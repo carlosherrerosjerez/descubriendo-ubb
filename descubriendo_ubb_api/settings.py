@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import dj_database_url
 import os
 from pathlib import Path
 
@@ -128,7 +129,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import dj_database_url
 
-DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+DATABASES = {
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+}
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
