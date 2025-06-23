@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Descubriendo UBB</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>window.jsPDF = window.jspdf.jsPDF;</script>
+</head>
+<body>
+<div class="d-flex">
+  <nav class="sidebar bg-primary text-white p-3">
+    <div class="text-center mb-4">
+      <img src="{% static 'dashboard/img/logo_ubb_blanco.png' %}" alt="Logo Blanco UBB" class="img-fluid" style="max-width: 100px;">
+      <h5 class="mt-2">Descubriendo UBB</h5>
+    </div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="#" class="nav-link text-white">Inicio</a></li>
+      <li class="nav-item"><a href="#" class="nav-link text-white">Reportes</a></li>
+    </ul>
+  </nav>
+
+  <main class="flex-grow-1 p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold">Estadísticas de Visitas</h2>
+      <div>
+        <button class="btn btn-outline-secondary me-2" onclick="exportarPDF()">Exportar PDF</button>
+        <button class="btn btn-outline-success" onclick="exportarExcel()">Exportar Excel</button>
+      </div>
+    </div>
+
+    <!-- Filtro por fecha -->
+    <form method="get" class="d-flex align-items-center gap-2 mb-4">
+      <label for="fecha_inicio">Desde:</label>
+      <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ request.GET.fecha_inicio|default:'' }}">
+      <label for="fecha_fin">Hasta:</label>
+      <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ request.GET.fecha_fin|default:'' }}">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </form>
+
+    <!-- Selector tipo de gráfico -->
+    <div class="mb-3 d-flex align-items-center gap-2">
+      <label for="tipoGrafico" class="form-label mb-0">Tipo de gráfico:</label>
+      <select id="tipoGrafico" class="form-select w-auto">
+        <option value="bar" selected>Barras</option>
+        <option value="line">Líneas</option>
+        <option value="pie">Pastel</option>
+      </select>
+    </div>
+
+    <div id="contenedor-exportable">
+      <div class="row mb-4">
+        <div class="col-md-4">
+          <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Total de Visitas</h5>
+              <p class="card-text fs-4">{{ total_visitas }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <canvas id="graficoVisitas"></canvas>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th>POI</th>
+            <th>Total de Visitas</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for item in visitas %}
+            <tr>
+              <td>{{ item.poi }}</td>
+              <td>{{ item.total }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let chart;
+
+  function crearGrafico(tipo) {
+    const ctx = document.getElementById('graficoVisitas').getContext('2d');
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+      type: tipo,
+      data: {
+        labels: [{% for item in visitas %}'{{ item.poi }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          label: 'Visitas',
+          data: [{% for item in visitas %}{{ item.total }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+          backgroundColor: [
+            'rgba(0, 123, 255, 0.5)',
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(40, 167, 69, 0.5)',
+            'rgba(255, 193, 7, 0.5)',
+            'rgba(23, 162, 184, 0.5)'
+          ],
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: tipo !== 'bar'
+          }
+        },
+        scales: tipo === 'pie' ? {} : {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    crearGrafico('bar');
+
+    document.getElementById('tipoGrafico').addEventListener('change', function () {
+      crearGrafico(this.value);
+    });
+  });
+
+  function exportarPDF() {
+    const contenedor = document.getElementById("contenedor-exportable");
+
+    html2canvas(contenedor).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = pageWidth - 20;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save("reporte_visitas.pdf");
+    });
+  }
+
+  function exportarExcel() {
+    const tabla = document.querySelector('table');
+    const wb = XLSX.utils.table_to_book(tabla, { sheet: "Visitas" });
+    XLSX.writeFile(wb, "reporte_visitas.xlsx");
+  }
+</script>
+</body>
+</html>

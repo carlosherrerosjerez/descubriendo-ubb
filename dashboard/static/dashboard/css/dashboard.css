@@ -1,0 +1,149 @@
+/* ==== Colores Institucionales ==== */
+:root {
+    --ubb-azul: #003C71;
+    --ubb-celeste: #00B0F0;
+    --ubb-blanco: #ffffff;
+    --ubb-gris-claro: #f8f9fa;
+    --ubb-gris-oscuro: #495057;
+    --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ==== Estilos Generales ==== */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--ubb-gris-claro);
+    color: var(--ubb-gris-oscuro);
+}
+
+/* ==== Sidebar ==== */
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background-color: var(--ubb-azul);
+    color: var(--ubb-blanco);
+    padding: 2rem 1.5rem;
+    box-shadow: var(--sombra-suave);
+}
+
+.sidebar .img-fluid {
+    margin-bottom: 1rem;
+}
+
+.sidebar h5 {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.sidebar .nav-link {
+    color: var(--ubb-blanco);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: var(--ubb-celeste);
+    color: var(--ubb-azul);
+    font-weight: 600;
+}
+
+/* ==== Contenido Principal ==== */
+main {
+    background-color: var(--ubb-blanco);
+    padding: 2rem;
+    width: 100%;
+    min-height: 100vh;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* ==== Títulos ==== */
+h2 {
+    color: var(--ubb-azul);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* ==== Botones ==== */
+.btn {
+    border-radius: 12px;
+    padding: 0.5rem 1.2rem;
+    font-weight: 500;
+}
+
+.btn-outline-secondary {
+    color: var(--ubb-azul);
+    border-color: var(--ubb-azul);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--ubb-azul);
+    color: var(--ubb-blanco);
+}
+
+.btn-outline-success {
+    color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-success:hover {
+    background-color: #198754;
+    color: var(--ubb-blanco);
+}
+
+/* ==== Tarjetas ==== */
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--sombra-suave);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: scale(1.01);
+}
+
+.card.bg-info {
+    background-color: var(--ubb-celeste) !important;
+    color: var(--ubb-azul);
+}
+
+/* ==== Tabla ==== */
+.table thead {
+    background-color: var(--ubb-azul);
+    color: var(--ubb-blanco);
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+/* ==== Responsive ==== */
+@media (max-width: 768px) {
+    .d-flex {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 1rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sidebar .nav {
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .btn {
+        margin-top: 0.5rem;
+    }
+}

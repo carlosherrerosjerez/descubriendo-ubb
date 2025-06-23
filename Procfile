@@ -1,0 +1,1 @@
+web: gunicorn descubriendo_ubb_api.wsgi
